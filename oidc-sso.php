@@ -18,23 +18,23 @@ const FIRST  = -99999999;
 const OPTION_NAME ='openid_connect_generic_settings';  # XXX
 
 
+/* Convenience functions */
 
+function get(&$var, $default=false) { return isset($var) ? $var : $default; }
 
+function static_filter($class, $tag, $priority=10, $accepted_args=1, $method='') {
+	if ( empty($method) ) $method = "filter_$tag";
+	return add_filter($tag, "$class::$method", $priority, $accepted_args);
+}
 
+function static_action($class, $tag, $priority=10, $accepted_args=1) {
+	return add_action($tag, "$class::action_$tag", $priority, $accepted_args);
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+function maybe_throw($value) {
+	if ( !is_wp_error($value) ) return $value;
+	wp_die($value); # XXX throw something, log etc.
+}
 
 
 
@@ -106,17 +106,17 @@ class Plugin {
 }
 
 
+/* Bootstrap */
 
+static_filter( Plugin::class, 'determine_current_user', LAST );
 
+static_filter( Plugin::class, 'login_url',        LAST, 2, 'always_redirect');
+static_filter( Plugin::class, 'logout_url',       LAST, 2, 'always_redirect');
+static_filter( Plugin::class, 'lostpassword_url', LAST, 2, 'always_redirect');
+static_filter( Plugin::class, 'register_url',     LAST, 2, 'always_redirect');
 
-
-
-
-
-
-
-
-
+static_action( Plugin::class, 'admin_init' );
+static_action( LoginForm::class, 'login_init', FIRST );
 
 
 
@@ -241,47 +241,6 @@ class Session {
 	}
 
 }
-
-
-
-/* Convenience functions */
-
-function get(&$var, $default=false) { return isset($var) ? $var : $default; }
-
-function static_filter($class, $tag, $priority=10, $accepted_args=1, $method='') {
-	if ( empty($method) ) $method = "filter_$tag";
-	return add_filter($tag, "$class::$method", $priority, $accepted_args);
-}
-
-function static_action($class, $tag, $priority=10, $accepted_args=1) {
-	return add_action($tag, "$class::action_$tag", $priority, $accepted_args);
-}
-
-function maybe_throw($value) {
-	if ( !is_wp_error($value) ) return $value;
-	wp_die($value); # XXX throw something, log etc.
-}
-
-
-/* Bootstrap */
-
-static_filter( Plugin::class, 'determine_current_user', LAST );
-
-static_filter( Plugin::class, 'login_url',        LAST, 2, 'always_redirect');
-static_filter( Plugin::class, 'logout_url',       LAST, 2, 'always_redirect');
-static_filter( Plugin::class, 'lostpassword_url', LAST, 2, 'always_redirect');
-static_filter( Plugin::class, 'register_url',     LAST, 2, 'always_redirect');
-
-static_action( Plugin::class, 'admin_init' );
-static_action( LoginForm::class, 'login_init', FIRST );
-
-
-
-
-
-
-
-
 
 
 
