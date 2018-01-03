@@ -5,11 +5,9 @@ class IdP {
 
 	const STATE_COOKIE = 'oidc-sso-state';
 
-	// REST Endpoints
-
 	static function login($params) {
 		// Redirect to IdP login with generated state
-		$state = static::new_state( get($params['redirect'], '') );
+		$state = static::new_state( get($params['redirect_to'], '') );
 		wp_redirect( static::auth_url($state, $params) );
 		exit;
 	}
@@ -23,8 +21,6 @@ class IdP {
 		exit;
 	}
 
-	// End REST Endpoints
-
 	static function logout($redirect='') {
 		$redirect = static::logout_target($redirect);
 		if ( is_user_logged_in() ) {
@@ -34,6 +30,10 @@ class IdP {
 		wp_redirect( $redirect );
 		exit;
 	}
+
+
+
+
 
 
 
@@ -58,7 +58,7 @@ class IdP {
 			'state'         => $state,
 			'scope'         => $settings->scope,
 			'client_id'     => $settings->client_id,
-			'redirect_uri'  => Authcode::url(),
+			'redirect_uri'  => site_url('wp-login.php', 'login'),
 		);
 
 		foreach (array('prompt', 'max_age', 'login_hint', 'kc_idp_hint', 'ui_locales', ) as $key) {

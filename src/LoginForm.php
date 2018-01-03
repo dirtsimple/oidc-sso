@@ -14,15 +14,23 @@ class LoginForm {
 			return;
 		}
 
-		# disable the login page
-		# XXX should probably display an error
-		wp_redirect(home_url());
-		exit;
+		# Treat register, lost password, etc. as logins handled by the IdP
+		static::login();
 	}
 
 	static function postpass() {
 		# enable post/page password functionality
 		return;
+	}
+
+	static function login() {
+		if ( !empty($_GET['state']) ) {
+			IdP::authorize($_GET);
+		} else {
+			if ( !empty($_REQUEST['reauth']) ) $_GET['max_age'] = '0';
+			IdP::login($_GET);
+		}
+		exit;
 	}
 
 	static function logout() {

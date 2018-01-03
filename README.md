@@ -20,9 +20,7 @@ It also adds a few minor features, like:
 
 * Token refresh is handled before other plugins are loaded and avoids generating a logout event or visible effects for timed-out or otherwise-invalidated sessions
 
-* An API is exposed, in case you want to create specialized login links; e.g. `\oidc_sso\Plugin::login_url('', false, ['kc_idp_hint'=>'google'])` .
-
-* The plugin uses Wordpress's REST endpoints instead of `wp-login.php`
+* You can pass arguments to the IdP by adding them to `login_url()`: both the standards-defined `prompt`, `max_age`, `login_hint`, `ui_locales`, and the Keycloak-specific `kc_idp_hint`.
 
 It also does NOT support these features, by design:
 
@@ -31,14 +29,17 @@ It also does NOT support these features, by design:
 * Disabling SSL verification (a horrifically bad idea)
 * The available actions and filters are different, and still subject to change.  In general, API calls made to the plugin are preferred over filtering within the plugin, and single shared hooks with more parameters are preferred to multiple variants of similar events.  (e.g., there is one `oidc_sso_userdata` filter for altering user data from the IdP before it hits Wordpress, whether the user is new or existing, instead of three different action hooks).
 
+It also has these requirements, that are not (yet) typical of Wordpress plugins:
+
+* You *must* be using a WP site built on Composer (e.g. using [bedrock](https://github.com/roots/bedrock/)), and install the plugin using Composer, as it uses Composer autoloading rather than registering its own autoloader.
+* A modern PHP version is required: 5.2 just won't do.  (I'm testing against 7.1 and a lot of what I'm doing requires at least 5.5, if not 5.6.)
+
 ## Issues
 
 This code is in an early draft state -- it's not even really alpha!  So some issues to be aware of:
 
 * There is no way to change the configuration: it uses the daggerhart plugin's settings at the moment, so you have to configure that plugin first.  (You can deactivate it after this one's set up.)
 * There is no error logging and in general errors are handled poorly.  I have a long list of specific error situations to code for, and it's not even been started on.
-* You *must* be using a WP site built on Composer (e.g. using [bedrock](https://github.com/roots/bedrock/)), and add the dependency on `firebase/php-jwt`, as well as a line to `"autoload": { "classmap": ["web/app/plugins/oidc-sso"] }` (or whatever directory this plugin installs in.  (Later, you won't need to do these two things, but you will still need to *install* the plugin via Composer, because revision control and repeatable installs are a beautiful thing.)
-* A modern PHP version is required: 5.2 just won't do.  (I'm testing against 7.1 and a lot of what I'm doing requires at least 5.5, if not 5.6.)
 * The code is not documented and lacks any automated tests.
 
 ## Todo

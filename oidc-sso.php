@@ -41,20 +41,6 @@ const OPTION_NAME ='openid_connect_generic_settings';  # XXX
 
 class Plugin {
 
-	static function login_url($redirect='', $reauth_after=false, $args=array()) {
-		if ( is_int($reauth_after) ) {
-			$args['max_age'] = $reauth_after;
-		} elseif ( $reauth_after === true ) {
-			$args['max_age'] = 0;
-		}
-		if ( !empty( $redirect ) ) $args['redirect'] = $redirect;
-		return Login::url($args);
-	}
-
-	static function logout_url($redirect='') {
-		return Logout::url( array('redirect' => $redirect, '_wpnonce'=>wp_create_nonce('wp_rest')) );
-	}
-
 	protected static $settings;
 
 	static function settings() {
@@ -78,6 +64,20 @@ class Plugin {
 	static function save_settings() {
 		update_option(OPTION_NAME, (array) static::settings());
 	}
+
+	static function always_redirect($url, $redirect='') {
+		// Always redirect to origin page
+		if ( empty($redirect) ) $url = add_query_arg('redirect_to', $_SERVER['REQUEST_URI'], $url);
+		return $url;
+	}
+
+
+
+
+
+
+
+
 
 
 	/**
@@ -103,58 +103,17 @@ class Plugin {
 		# Register settings page
 	}
 
-	static function action_rest_api_init() {
-		Login::register();
-		Authcode::register();
-	}
-
-	static function filter_logout_url($url, $redirect='') {
-		// Always redirect to origin page
-		if ( empty($redirect) ) $url = add_query_arg('redirect_to', $_SERVER['REQUEST_URI'], $url);
-		return $url;
-	}
-
-	static function filter_login_url($url, $redirect='', $reauth=false) {
-		return static::login_url(empty($redirect) ? $_SERVER['REQUEST_URI'] : $redirect, $reauth);
-	}
 }
 
 
 
-class Endpoint {
-	const REST_NS = 'oidc-sso';
 
-	static function url($args=array()) {
-		$url = rest_url(static::REST_NS . static::PATH);
-		if ( ! empty($args) ) $url = add_query_arg($args, $url);
-		return $url;
-	}
 
-	static function _GET($request) {
-		try {
-			static::GET($request->get_query_params());
-		} catch (Exception $e) {
-			Plugin::error_page($e);   # XXX
-		}
-	}
 
-	static function register() {
-		register_rest_route(
-			static::REST_NS, static::PATH,
-			array('methods' => 'GET', 'callback' => array(static::class, '_GET'))
-		);
-	}
-}
 
-class Login extends Endpoint {
-	const PATH='/login';
-	static function GET($request) { IdP::login($request); }
-}
 
-class Authcode extends Endpoint {
-	const PATH='/authcode';
-	static function GET($request) { IdP::authorize($request); }
-}
+
+
 
 
 
@@ -289,8 +248,9 @@ class Session {
 
 function get(&$var, $default=false) { return isset($var) ? $var : $default; }
 
-function static_filter($class, $tag, $priority=10, $accepted_args=1) {
-	return add_filter($tag, "$class::filter_$tag", $priority, $accepted_args);
+function static_filter($class, $tag, $priority=10, $accepted_args=1, $method='') {
+	if ( empty($method) ) $method = "filter_$tag";
+	return add_filter($tag, "$class::$method", $priority, $accepted_args);
 }
 
 function static_action($class, $tag, $priority=10, $accepted_args=1) {
@@ -306,14 +266,13 @@ function maybe_throw($value) {
 /* Bootstrap */
 
 static_filter( Plugin::class, 'determine_current_user', LAST );
-static_filter( Plugin::class, 'login_url',  LAST, 3 );
-static_filter( Plugin::class, 'logout_url', LAST, 2 );
-#static_filter( Plugin::class, 'lostpassword_url', LAST);
-#static_filter( Plugin::class, 'register_url',     LAST);
+
+static_filter( Plugin::class, 'login_url',        LAST, 2, 'always_redirect');
+static_filter( Plugin::class, 'logout_url',       LAST, 2, 'always_redirect');
+static_filter( Plugin::class, 'lostpassword_url', LAST, 2, 'always_redirect');
+static_filter( Plugin::class, 'register_url',     LAST, 2, 'always_redirect');
 
 static_action( Plugin::class, 'admin_init' );
-static_action( Plugin::class, 'rest_api_init' );
-
 static_action( LoginForm::class, 'login_init', FIRST );
 
 
