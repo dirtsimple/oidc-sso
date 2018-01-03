@@ -1,0 +1,9 @@
+{
+  "name": "dirtsimple/oidc-sso",
+  "type": "wordpress-plugin",
+  "autoload": { "classmap": ["."] },
+  "require": {
+    "composer/installers": "^1.4",
+    "firebase/php-jwt": "^5.0"
+  }
+}
