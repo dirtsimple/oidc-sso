@@ -22,13 +22,14 @@ It also adds a few minor features, like:
 
 * An API is exposed, in case you want to create specialized login links; e.g. `\oidc_sso\Plugin::login_url('', false, ['kc_idp_hint'=>'google'])` .
 
+* The plugin uses Wordpress's REST endpoints instead of `wp-login.php`
+
 It also does NOT support these features, by design:
 
 * Making a site private (there are other plugins for that)
 * NOT linking existing users, or linking them by anything other than email address or IdP subject identity
 * Disabling SSL verification (a horrifically bad idea)
 * The available actions and filters are different, and still subject to change.  In general, API calls made to the plugin are preferred over filtering within the plugin, and single shared hooks with more parameters are preferred to multiple variants of similar events.  (e.g., there is one `oidc_sso_userdata` filter for altering user data from the IdP before it hits Wordpress, whether the user is new or existing, instead of three different action hooks).
-* The plugin uses Wordpress's REST endpoints
 
 ## Issues
 
