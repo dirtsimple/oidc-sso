@@ -131,7 +131,7 @@ class IdP {
 		);
 
 		if ( $grant_type === 'authorization_code' ) {
-			$params += array( 'scope' => $settings->scope, 'redirect_uri' => Authcode::url() );
+			$params += array( 'scope' => $settings->scope, 'redirect_uri' => site_url('wp-login.php', 'login') );
 		}
 
 		return static::post('endpoint_token', array('body' => $params));
