@@ -14,16 +14,6 @@ class IdP {
 		exit;
 	}
 
-	static function logout($params) {
-		$redirect = static::logout_target(get($params['redirect'], ''));
-		if ( is_user_logged_in() ) {
-			$redirect = static::idp_logout_url($redirect);
-			wp_logout();
-		}
-		wp_redirect( $redirect );
-		exit;
-	}
-
 	static function authorize($params) {
 		$redirect = maybe_throw( static::check_state( get($params['state'], '') ) );
 		$tokens = maybe_throw( static::fetch_tokens('authorization_code', array('code' => get( $params['code'], ''))) );
@@ -34,6 +24,16 @@ class IdP {
 	}
 
 	// End REST Endpoints
+
+	static function logout($redirect='') {
+		$redirect = static::logout_target($redirect);
+		if ( is_user_logged_in() ) {
+			$redirect = static::idp_logout_url($redirect);
+			wp_logout();
+		}
+		wp_redirect( $redirect );
+		exit;
+	}
 
 
 

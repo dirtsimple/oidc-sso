@@ -37,9 +37,8 @@ This code is in an early draft state -- it's not even really alpha!  So some iss
 
 * There is no way to change the configuration: it uses the daggerhart plugin's settings at the moment, so you have to configure that plugin first.  (You can deactivate it after this one's set up.)
 * There is no error logging and in general errors are handled poorly.  I have a long list of specific error situations to code for, and it's not even been started on.
-* The `wp-login` page isn't disabled yet, but will be.
 * You *must* be using a WP site built on Composer (e.g. using [bedrock](https://github.com/roots/bedrock/)), and add the dependency on `firebase/php-jwt`, as well as a line to `"autoload": { "classmap": ["web/app/plugins/oidc-sso"] }` (or whatever directory this plugin installs in.  (Later, you won't need to do these two things, but you will still need to *install* the plugin via Composer, because revision control and repeatable installs are a beautiful thing.)
-* A modern PHP version is required: 5.2 just won't do.  (I'm testing against 7.1 and a lot of what I'm doing probably requires at least 5.4.)
+* A modern PHP version is required: 5.2 just won't do.  (I'm testing against 7.1 and a lot of what I'm doing requires at least 5.5, if not 5.6.)
 * The code is not documented and lacks any automated tests.
 
 ## Todo
@@ -65,7 +64,6 @@ When refreshing tokens, errors should usually not be displayed, and the user sim
 
 * Auto-login support ("Already sso'd?  redirect w/prompt=none")
 * Freshness support ("force login if it's been more than X seconds")
-* Logout nonce issue (REST API assumes you're logged out if you don't have _wpnonce, but error is in JSON)
 
 ### Wishlist
 
@@ -76,5 +74,4 @@ When refreshing tokens, errors should usually not be displayed, and the user sim
 
 * Admin config screen
 * Allow all user info to be full formats instead of some being formats and some being keys
-* An actual composer.json
 

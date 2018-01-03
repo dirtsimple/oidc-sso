@@ -102,24 +102,24 @@ class Plugin {
 	static function action_admin_init() {
 		# Register settings page
 	}
-	static function action_login_init() {
-		# Register login page overrides
-	}
 
 	static function action_rest_api_init() {
 		Login::register();
-		Logout::register();
 		Authcode::register();
 	}
 
 	static function filter_logout_url($url, $redirect='') {
-		return static::logout_url(empty($redirect) ? $_SERVER['REQUEST_URI'] : $redirect);
+		// Always redirect to origin page
+		if ( empty($redirect) ) $url = add_query_arg('redirect_to', $_SERVER['REQUEST_URI'], $url);
+		return $url;
 	}
 
 	static function filter_login_url($url, $redirect='', $reauth=false) {
 		return static::login_url(empty($redirect) ? $_SERVER['REQUEST_URI'] : $redirect, $reauth);
 	}
 }
+
+
 
 class Endpoint {
 	const REST_NS = 'oidc-sso';
@@ -151,15 +151,15 @@ class Login extends Endpoint {
 	static function GET($request) { IdP::login($request); }
 }
 
-class Logout extends Endpoint {
-	const PATH='/logout';
-	static function GET($request) { IdP::logout($request); }
-}
-
 class Authcode extends Endpoint {
 	const PATH='/authcode';
 	static function GET($request) { IdP::authorize($request); }
 }
+
+
+
+
+
 
 
 class Session {
@@ -306,15 +306,15 @@ function maybe_throw($value) {
 /* Bootstrap */
 
 static_filter( Plugin::class, 'determine_current_user', LAST );
-static_filter( Plugin::class, 'login_url',  LAST, 2 );
-static_filter( Plugin::class, 'logout_url', LAST, 3 );
+static_filter( Plugin::class, 'login_url',  LAST, 3 );
+static_filter( Plugin::class, 'logout_url', LAST, 2 );
 #static_filter( Plugin::class, 'lostpassword_url', LAST);
 #static_filter( Plugin::class, 'register_url',     LAST);
 
 static_action( Plugin::class, 'admin_init' );
 static_action( Plugin::class, 'rest_api_init' );
-static_action( Plugin::class, 'login_init', FIRST );  // disable login page almost entirely
 
+static_action( LoginForm::class, 'login_init', FIRST );
 
 
 
