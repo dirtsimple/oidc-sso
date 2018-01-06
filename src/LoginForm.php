@@ -2,11 +2,13 @@
 namespace oidc_sso;
 
 class LoginForm {
-
 	static function action_login_init() {
 		global $action;
-		$class = static::class;
 
+		// leave login enabled until all settings configured
+		if (! Plugin::is_configured() ) return;
+
+		$class = static::class;
 		if ( method_exists($class, $action) ) {
 			# override actions with our methods
 			$method = "$class::$action";
@@ -14,14 +16,12 @@ class LoginForm {
 			return;
 		}
 
-		# Treat register, lost password, etc. as logins handled by the IdP
+		// Treat register, lost password, etc. as logins handled by the IdP
 		static::login();
 	}
 
-	static function postpass() {
-		# enable post/page password functionality
-		return;
-	}
+	// enable post/page password functionality
+	static function postpass() { return; }
 
 	static function login() {
 		if ( !empty($_GET['state']) ) {
@@ -38,5 +38,4 @@ class LoginForm {
 		IdP::logout( get( $_REQUEST['redirect_to'], '') );
 		exit;
 	}
-
 }

@@ -15,8 +15,8 @@ namespace oidc_sso;
 const LAST   = 99999999;
 const FIRST  = -99999999;
 
-const OPTION_NAME ='openid_connect_generic_settings';  # XXX
-
+const OPTION_NAME ='oidc_sso';
+const REQUIRED_SETTINGS = 'client_id endpoint_login endpoint_token scope username_format nickname_format email_format displayname_format';
 
 /* Convenience functions */
 
@@ -48,21 +48,26 @@ class Plugin {
 			$defaults = array(
 				'client_id'         => '',
 				'client_secret'     => '',
-				'scope'             => '',
+				'scope'             => 'openid',
 				'endpoint_login'    => '',
 				'endpoint_userinfo' => '',
 				'endpoint_token'    => '',
 				'endpoint_end_session' => '',
-				'endpoint_register' => '',
 				'http_request_timeout' => 5,
+				'username_format'    => '{random:5}',
+				'nickname_format'    => '{given name} {family_name:1}',
+				'email_format'       => '{email}',
+				'displayname_format' => '{given name} {family_name:1}'
 			);
 			static::$settings = (object) array_replace_recursive($defaults, get_option(OPTION_NAME, array()));
 		}
 		return static::$settings;
 	}
 
-	static function save_settings() {
-		update_option(OPTION_NAME, (array) static::settings());
+	static function is_configured() {
+		$s = static::settings();
+		foreach (explode(' ', REQUIRED_SETTINGS) as $key) if ( empty($s->$key) ) return false;
+		return true;
 	}
 
 	static function always_redirect($url, $redirect='') {
@@ -70,11 +75,6 @@ class Plugin {
 		if ( empty($redirect) ) $url = add_query_arg('redirect_to', $_SERVER['REQUEST_URI'], $url);
 		return $url;
 	}
-
-
-
-
-
 
 
 
@@ -99,10 +99,12 @@ class Plugin {
 		return $user_id;
 	}
 
-	static function action_admin_init() {
-		# Register settings page
+	static function filter_plugin_action_links($links) {
+		if ( current_user_can( 'manage_options' ) )  {
+			array_unshift($links, '<a href="users.php?page=oidc_sso-settings">'. __( 'Settings' ) . '</a>');
+		}
+		return $links;
 	}
-
 }
 
 
@@ -114,10 +116,8 @@ static_filter( Plugin::class, 'login_url',        LAST, 2, 'always_redirect');
 static_filter( Plugin::class, 'logout_url',       LAST, 2, 'always_redirect');
 static_filter( Plugin::class, 'lostpassword_url', LAST, 2, 'always_redirect');
 static_filter( Plugin::class, 'register_url',     LAST, 2, 'always_redirect');
+add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), array(Plugin::class, 'filter_plugin_action_links'));
 
-static_action( Plugin::class, 'admin_init' );
+static_action( Settings::class, 'admin_menu' );
 static_action( LoginForm::class, 'login_init', FIRST );
-
-
-
 

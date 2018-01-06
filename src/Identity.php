@@ -51,7 +51,7 @@ class Identity {
 		if ( is_user($user) ) {
 			$data['ID'] = $user->ID;
 		} else {
-			$data['user_login'] = $this->unique_login($this->username(), $user);
+			$data['user_login'] = $this->unique_login($this->format('username'), $user);
 			$data['user_pass']  = wp_generate_password( 32, TRUE, TRUE );
 		}
 		return apply_filters('oidc_sso_userdata', $data, $this, $user);
@@ -68,17 +68,17 @@ class Identity {
 		return $key==='random' || isset($this->id_claim->$key) || isset($this->userinfo()[$key]);
 	}
 
-	protected function username() {
-		$id_key = get( Plugin::settings()->identity_key, '');
-		return $this->expression( '{' . $id_key . '|preferred_username|name|email}');
-	}
-
 	function unique_login($name, $user=null) {
 		$name = sanitize_user( explode('@', $name)[0] ); $username = $name; $count = 1;
 		$user_id = is_user($user) ? $user->ID : 0;
 		while ( ($uid = username_exists($username)) && $uid != $user_id) $username = $name . ++$count;
 		return $username;
 	}
+
+
+
+
+
 
 	protected function expression($format) {
 		foreach(explode('||', $format) as $alt) {
@@ -100,13 +100,8 @@ class Identity {
 
 	protected function format($key) {
 		$settings = Plugin::settings();
-		$format = get($settings->{$key . '_key'}, '');
-		if (empty($format)) {
-			$format = get($settings->{$key . '_format'}, '');
-			return $this->expression($format);
-		} else {
-			return $this->expression( '{' . $format . '}' );
-		}
+		$format = get($settings->{$key . '_format'}, '');
+		return $this->expression($format);
 	}
 
 	protected function userinfo() {
@@ -119,5 +114,10 @@ class Identity {
 function is_user($user) {
 	return is_a( $user, 'WP_User' ) && $user->exists();
 }
+
+
+
+
+
 
 

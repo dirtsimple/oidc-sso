@@ -36,9 +36,8 @@ It also has these requirements, that are not (yet) typical of Wordpress plugins:
 
 ## Issues
 
-This code is in an early draft state -- it's not even really alpha!  So some issues to be aware of:
+This code should be considered alpha: i.e., suitable for developer testing only.  Some issues to be aware of:
 
-* There is no way to change the configuration: it uses the daggerhart plugin's settings at the moment, so you have to configure that plugin first.  (You can deactivate it after this one's set up.)
 * There is no error logging and in general errors are handled poorly.  I have a long list of specific error situations to code for, and it's not even been started on.
 * The code is not documented and lacks any automated tests.
 

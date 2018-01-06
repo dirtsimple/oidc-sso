@@ -111,10 +111,10 @@ class IdP {
 	}
 
 	static function fetch_userinfo($access_token, $subject) {
+		if ( empty( Plugin::settings()->endpoint_userinfo ) ) return array();
 		$request = array('headers'=>array('Authorization'=>"Bearer $access_token"));
 		return maybe_throw( static::post('endpoint_userinfo', $request) );
 	}
-
 
 
 
