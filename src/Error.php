@@ -8,7 +8,7 @@ class Error {
 		if (!empty($handler)) {
 			$handler($err, $ctx);
 		} else {
-			# XXX log to PHP error_log
+			error_log("Error during $ctx: " . json_encode($err, JSON_PRETTY_PRINT));
 		}
 	}
 

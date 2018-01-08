@@ -36,7 +36,7 @@ It also has these requirements, that are not (yet) typical of Wordpress plugins:
 
 This code should be considered alpha: i.e., suitable for developer testing only.  Some issues to be aware of:
 
-* Error handling is very basic.  You need to filter `oidc_sso_error_logger` or `oidc_sso_error_logger` for an error to do anything other than `wp_die()` .  In the case of an error during token refresh, the logger is invoked, but the user is silently logged out without a visible error message.  (Though you could change this with an appropriate logger function.)
+* Error handling is very basic.  You need to filter `oidc_sso_error_logger` or `oidc_sso_error_logger` for an error to do anything other than  `error_log()` and `wp_die()` .  In the case of an error during token refresh, the logger is invoked, but the user is silently logged out without a visible error message.  (Though you could change this with an appropriate logger function.)
 * The code is not documented and lacks any automated tests.
 
 ## Todo
