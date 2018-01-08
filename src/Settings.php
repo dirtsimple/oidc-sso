@@ -176,7 +176,7 @@ Settings::$page->parent('users.php')->option('oidc_sso')->sections( array(
 		array(
 			'username_format'     => new TextSetting(
 				__('Wordpress Login'),
-				__('How a new user\'s login should be generated from their identity. You can use <code>random</code> to generate a unique ID automatically, e.g. <code>random:5</code> to generate 5-digit hex number.  If a generated login matches an existing login, it will be deduplicated by adding a number, e.g. <code>someuser3</code> if there\'s already a <code>someuser</code> and <code>someuser2</code>.'),
+				__('How a new user\'s login should be generated from their identity. You can use <code>random</code> to generate a unique ID automatically, e.g. <code>{random:5}</code> to generate 5-digit hex number.  If a generated login matches an existing login, it will be deduplicated by adding a number, e.g. <code>someuser3</code> if there\'s already a <code>someuser</code> and <code>someuser2</code>.'),
 				'{random:5}'
 			),
 			'nickname_format'     => new TextSetting(
