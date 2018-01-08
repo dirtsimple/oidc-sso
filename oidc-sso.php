@@ -31,11 +31,11 @@ function static_action($class, $tag, $priority=10, $accepted_args=1) {
 	return add_action($tag, "$class::action_$tag", $priority, $accepted_args);
 }
 
-function maybe_throw($value) {
+function trap($value, $context) {
 	if ( !is_wp_error($value) ) return $value;
-	wp_die($value); # XXX throw something, log etc.
+	Error::handle($value, $context);
+	wp_die($value);  # default if no handler
 }
-
 
 
 

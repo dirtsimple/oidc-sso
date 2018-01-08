@@ -13,16 +13,22 @@ class IdP {
 	}
 
 	static function authorize($params) {
-		$redirect = maybe_throw( static::check_state( get($params['state'], '') ) );
-		$tokens = maybe_throw( static::fetch_tokens('authorization_code', array('code' => get( $params['code'], ''))) );
-		$identity = new Identity($tokens);
+		$redirect = trap( static::check_state( get($params['state'], '') ), 'authorize' );
+		# XXX check for error param as per https://openid.net/specs/openid-connect-core-1_0.html#AuthError and https://tools.ietf.org/html/rfc6749#section-4.1.2.1
+		$tokens = trap( static::fetch_tokens('authorization_code', array('code' => get( $params['code'], ''))), 'authorize' );
+		try {
+			$identity = new Identity($tokens);
+		}
+		catch ( \Exception $e ) {
+			trap( new \WP_Error( 'invalid_id_token', __( 'Invalid id_token' ), $e ), 'authorize' );
+		}
 		$identity->login();
 		wp_safe_redirect( empty($redirect) ? home_url() : $redirect );
 		exit;
 	}
 
 	static function logout($redirect='') {
-		$redirect = static::logout_target($redirect);
+		$redirect = static::safe_url($redirect);
 		if ( is_user_logged_in() ) {
 			$redirect = static::idp_logout_url($redirect);
 			wp_logout();
@@ -33,17 +39,11 @@ class IdP {
 
 
 
-
-
-
-
-
-
 	static function check_state($state) {
 		// check state and get redirect value
 		$cookie = get($_COOKIE[static::STATE_COOKIE], '');
 		if (empty($state) || empty($cookie) || $state !== wp_hash($cookie)) {
-			return new \WP_Error( 'invalid-state', __( 'Invalid state.' . $cookie ), $state );
+			return new \WP_Error( 'invalid_state', __( 'Invalid state.' . $cookie ), $state );
 		}
 		list ($nonce, $redirect) = explode(' ', $cookie, 2);
 		static::set_state_cookie('');  // state can only be used once
@@ -80,7 +80,7 @@ class IdP {
 	}
 
 
-	protected static function logout_target($redirect) {
+	protected static function safe_url($redirect) {
 		if ( empty($redirect) ) return home_url();
 		$redirect = wp_sanitize_redirect($redirect);
 		$fallback = apply_filters('wp_safe_redirect_fallback', home_url(), 302);
@@ -113,7 +113,7 @@ class IdP {
 	static function fetch_userinfo($access_token, $subject) {
 		if ( empty( Plugin::settings()->endpoint_userinfo ) ) return array();
 		$request = array('headers'=>array('Authorization'=>"Bearer $access_token"));
-		return maybe_throw( static::post('endpoint_userinfo', $request) );
+		return trap( static::post('endpoint_userinfo', $request), 'userinfo' );
 	}
 
 
@@ -148,7 +148,7 @@ class IdP {
 
 		$resp = json_decode( wp_remote_retrieve_body($resp), TRUE );
 		if ( isset( $resp[ 'error' ] ) ) {
-			return new \WP_Error( $resp['error'], get( $resp['error_description'], $resp['error'] ), $resp );
+			return new \WP_Error( 'oidc_' . $resp['error'], esc_html( get( $resp['error_description'], $resp['error'] ) ), $resp );
 		}
 		return $resp;
 	}

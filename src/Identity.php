@@ -21,11 +21,12 @@ class Identity {
 	}
 
 	function user() {
+		# XXX filter 'insert_user_meta' so META_KEY can be set before profile_update/user_register?
 		if ( is_user($user = $this->find_user()) ) {
 			$user_id = $user->ID;
-			maybe_throw( wp_update_user($this->userdata($user)), 'failed-user-update', 'Failed user update.' );
+			trap( wp_update_user($this->userdata($user)), 'user_update');
 		} else {
-			$user_id = maybe_throw( wp_insert_user($this->userdata()), 'failed-user-creation', 'Failed user creation.' );
+			$user_id = trap( wp_insert_user($this->userdata()), 'user_create');
 			$user = get_user_by('ID', $user_id);
 		}
 		update_user_meta( $user_id, static::META_KEY, (string) $this->subject );
@@ -37,7 +38,6 @@ class Identity {
 		if (!empty($users)) return $users[0];
 		return get_user_by('email', $this->email);
 	}
-
 
 	function userdata($user=null) {
 		$data = array(
@@ -86,7 +86,7 @@ class Identity {
 				return preg_replace_callback('/\{([^}]+)\}/u', array($this, '__lookup'), $alt);
 			} catch (\Exception $e) { continue; }
 		}
-		return maybe_throw( new \WP_Error( 'incomplete-user-claim', __( 'User claim incomplete' ), $format ) );
+		return trap( new \WP_Error( 'incomplete_user_claim', __( 'User claim incomplete' ), $format ), 'userinfo' );
 	}
 
 	protected function __lookup($matches) {

@@ -53,8 +53,7 @@ class Session {
 	function do_refresh() {
 		$resp = IdP::fetch_tokens('refresh_token', array('refresh_token'=>$this->refresh_token));
 		if ( is_wp_error( $resp ) ) {
-			$resp->add( 'refresh_token' , __( 'Refresh token failed.' ) );
-			# XXX log the error here
+			Error::log($resp, 'refresh');
 			return false;
 		} else {
 			$this->authorize($resp);
@@ -79,6 +78,7 @@ class Session {
 		wp_set_auth_cookie( $this->user_id, FALSE, '', $this->token);
 		$this->save();
 	}
+
 
 	function save() {
 		if ($this->dirty) {

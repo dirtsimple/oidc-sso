@@ -1,8 +1,6 @@
 # OpenID Connect Single-SignOn for WP
 
-This is a draft-quality partial implementation of an OpenID Connect single-signon plugin for Wordpress, similar in capabilities to [daggerhart/openid-connect-generic](https://github.com/daggerhart/openid-connect-generic), but with some critical differences in purpose.
-
-Specifically:
+This is an OpenID Connect single-signon plugin for Wordpress, similar in many respects to [daggerhart/openid-connect-generic](https://github.com/daggerhart/openid-connect-generic), but with a few critical differences in purpose.  Specifically:
 
 * It's designed to be used by *front-end* users (e.g. LearnDash, Woocommerce, etc.), rather than back-end users.  So it always redirects to the origin page of a login/logout, and tries not to *ever* give the user an error message if possible.
 
@@ -38,7 +36,7 @@ It also has these requirements, that are not (yet) typical of Wordpress plugins:
 
 This code should be considered alpha: i.e., suitable for developer testing only.  Some issues to be aware of:
 
-* There is no error logging and in general errors are handled poorly.  I have a long list of specific error situations to code for, and it's not even been started on.
+* Error handling is very basic.  You need to filter `oidc_sso_error_logger` or `oidc_sso_error_logger` for an error to do anything other than `wp_die()` .  In the case of an error during token refresh, the logger is invoked, but the user is silently logged out without a visible error message.  (Though you could change this with an appropriate logger function.)
 * The code is not documented and lacks any automated tests.
 
 ## Todo
@@ -55,11 +53,6 @@ Each of these kinds of errors needs to be handled differently in the UI, includi
 
 When refreshing tokens, errors should usually not be displayed, and the user simply logged out silently.  While this may cause users to be logged out in case of temporary availability issues with the IdP, we are largely assuming the IdP is in the same datacenter with the Wordpress site and that restarts of the IdP are likely less frequent than restarts of Wordpress.  These decisions may not play well with more distributed or less-managed environments.
 
-### Logging
-
-* db-based logging similar to the old plugin?
-* sysadmin notifications?
-
 ### Research/Design Needed
 
 * Auto-login support ("Already sso'd?  redirect w/prompt=none")
@@ -69,9 +62,4 @@ When refreshing tokens, errors should usually not be displayed, and the user sim
 
 * Actually verify JWT tokens instead of trusting them blindly
 * OIDC discovery so you only have to enter one URL in the config
-
-### Other
-
-* Admin config screen
-* Allow all user info to be full formats instead of some being formats and some being keys
 
