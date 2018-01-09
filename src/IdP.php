@@ -14,11 +14,13 @@ class IdP {
 
 	static function authorize($params) {
 		$redirect = trap( static::check_state( get($params['state'], '') ), 'authorize' );
-		# XXX check for error param as per https://openid.net/specs/openid-connect-core-1_0.html#AuthError and https://tools.ietf.org/html/rfc6749#section-4.1.2.1
-		$tokens = trap( static::fetch_tokens('authorization_code', array('code' => get( $params['code'], ''))), 'authorize' );
-		try {
-			$identity = new Identity($tokens);
+		if ( !empty($params['error']) ) {
+			# per https://openid.net/specs/openid-connect-core-1_0.html#AuthError and https://tools.ietf.org/html/rfc6749#section-4.1.2.1
+			$data = array('redirect' => $redirect, 'error_uri' => get($params['error_uri'], ''));
+			trap( new \WP_Error( 'oidc_' . $params['error'], esc_html(get($params['error_description'], $params['error'])), $data), 'authorize' );
 		}
+		$tokens = trap( static::fetch_tokens('authorization_code', array('code' => get( $params['code'], ''))), 'authorize' );
+		try { $identity = new Identity($tokens); }
 		catch ( \Exception $e ) {
 			trap( new \WP_Error( 'invalid_id_token', __( 'Invalid id_token' ), $e ), 'authorize' );
 		}
@@ -37,13 +39,11 @@ class IdP {
 		exit;
 	}
 
-
-
 	static function check_state($state) {
 		// check state and get redirect value
 		$cookie = get($_COOKIE[static::STATE_COOKIE], '');
 		if (empty($state) || empty($cookie) || $state !== wp_hash($cookie)) {
-			return new \WP_Error( 'invalid_state', __( 'Invalid state.' . $cookie ), $state );
+			return new \WP_Error( 'invalid_state', __( 'Invalid state.' ), $state );
 		}
 		list ($nonce, $redirect) = explode(' ', $cookie, 2);
 		static::set_state_cookie('');  // state can only be used once
