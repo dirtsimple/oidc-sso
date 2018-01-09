@@ -20,6 +20,8 @@ It also adds a few minor features, like:
 
 * You can pass arguments to the IdP by adding them to `login_url()`: both the standards-defined `prompt`, `max_age`, `login_hint`, `ui_locales`, and the Keycloak-specific `kc_idp_hint`.
 
+* If you're using Keycloak, Wordpress's user registration URL will redirect to your Keycloak user registration URL
+
 It also does NOT support these features, by design:
 
 * Making a site private (there are other plugins for that)
