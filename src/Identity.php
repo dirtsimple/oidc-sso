@@ -21,7 +21,7 @@ class Identity {
 	}
 
 	function user() {
-		# XXX filter 'insert_user_meta' so META_KEY can be set before profile_update/user_register?
+		add_filter('insert_user_meta', array($this, 'filter_insert_user_meta'), 10, 3);
 		if ( is_user($user = $this->find_user()) ) {
 			$user_id = $user->ID;
 			trap( wp_update_user($this->userdata($user)), 'user_update');
@@ -29,7 +29,7 @@ class Identity {
 			$user_id = trap( wp_insert_user($this->userdata()), 'user_create');
 			$user = get_user_by('ID', $user_id);
 		}
-		update_user_meta( $user_id, static::META_KEY, (string) $this->subject );
+		remove_filter('insert_user_meta', array($this, 'filter_insert_user_meta'), 10);
 		return $user;
 	}
 
@@ -57,6 +57,11 @@ class Identity {
 		return apply_filters('oidc_sso_userdata', $data, $this, $user);
 	}
 
+	function filter_insert_user_meta($meta, $user, $update) {
+		$meta[static::META_KEY] = (string) $this->subject;
+		return apply_filters('oidc_sso_usermeta', $meta, $this, $user, $update);
+	}
+
 	function __get($key) {
 		if ($key==='random') return md5( mt_rand() . microtime( true ) );
 		if (isset($this->id_claim->$key)) return $this->id_claim->$key;
@@ -74,11 +79,6 @@ class Identity {
 		while ( ($uid = username_exists($username)) && $uid != $user_id) $username = $name . ++$count;
 		return $username;
 	}
-
-
-
-
-
 
 	protected function expression($format) {
 		foreach(explode('||', $format) as $alt) {
