@@ -16,7 +16,7 @@ class LoginForm {
 			return;
 		}
 
-		// Treat register, lost password, etc. as logins handled by the IdP
+		// Treat lost password, etc. as logins handled by the IdP
 		static::login();
 	}
 
@@ -38,8 +38,15 @@ class LoginForm {
 		if ( !empty($_GET['state']) ) {
 			IdP::authorize(wp_unslash($_GET));
 		} else {
-			if ( !empty($_REQUEST['reauth']) ) $_GET['max_age'] = '0';
-			IdP::login(wp_unslash($_GET));
+			// Ensure max_age is set if a reauth is requested
+			if ( !empty($_REQUEST['reauth']) ) $_GET['max_age'] = get($_GET['max_age'], '0');
+
+			if ( !is_user_logged_in() || isset($_GET['max_age']) ) {
+				IdP::login(wp_unslash($_GET));
+			} else {
+				// Already logged in and no re-auth requested: just redirect
+				IdP::safe_redirect( static::get_redirect() );
+			}
 		}
 		exit;
 	}
