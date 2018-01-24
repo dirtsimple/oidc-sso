@@ -24,9 +24,9 @@ class Identity {
 		add_filter('insert_user_meta', array($this, 'filter_insert_user_meta'), 10, 3);
 		if ( is_user($user = $this->find_user()) ) {
 			$user_id = $user->ID;
-			trap( wp_update_user($this->userdata($user)), 'user_update');
+			trap( wp_update_user(wp_slash($this->userdata($user))), 'user_update');
 		} else {
-			$user_id = trap( wp_insert_user($this->userdata()), 'user_create');
+			$user_id = trap( wp_insert_user(wp_slash($this->userdata())), 'user_create');
 			$user = get_user_by('ID', $user_id);
 		}
 		remove_filter('insert_user_meta', array($this, 'filter_insert_user_meta'), 10);
