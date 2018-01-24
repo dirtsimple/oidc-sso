@@ -105,7 +105,7 @@ class Plugin {
 		) {
 			// We only do silent login if the cookie is set, to prevent redirect loops
 			$attempt = get($_COOKIE['oidc_sso_last_login_attempt'], 0);
-			if ( !empty($attempt) && time() > intval($attempt) + $interval ) {
+			if ( !empty($attempt) && time() > intval($attempt) + $interval * 60 ) {
 				wp_redirect( add_query_arg('prompt', 'none', wp_login_url($_SERVER['REQUEST_URI'])) );
 				exit;
 			}
