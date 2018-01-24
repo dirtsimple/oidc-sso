@@ -8,12 +8,12 @@ class IdP {
 		// Redirect to IdP login with generated state
 		$state = static::new_state( get($params['redirect_to'], ''),  get($params['prompt'], ''));
 		setcookie('oidc_sso_last_login_attempt', intval(time()), time() + YEAR_IN_SECONDS, COOKIEPATH, COOKIE_DOMAIN, true, true);
-		wp_redirect( static::auth_url($state, $params) );
-		exit;
+		wp_redirect( static::auth_url($state, $params) ); exit;
 	}
 
 	static function authorize($params) {
 		$state = trap( static::check_state( get($params['state'], '') ), 'authorize');
+		if ( is_user_logged_in() ) wp_logout();  // destroy previous session
 		if ( $state->prompt === 'none' && substr_compare( 'xxxxxxxxx' . get($params['error'], ''), '_required', -9 ) === 0 )
 			static::safe_redirect( $state->redirect );
 		elseif ( !empty($params['error']) ) {
