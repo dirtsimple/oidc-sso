@@ -4,8 +4,8 @@ namespace oidc_sso;
 class Identity {
 
 	const META_KEY='openid-connect-generic-subject-identity';
-	public $id_claim, $subject;
-	protected $tokens, $userinfo;
+	public $id_claim, $subject, $tokens;
+	protected $userinfo;
 
 	function __construct($token_response) {
 		$this->tokens = $token_response;

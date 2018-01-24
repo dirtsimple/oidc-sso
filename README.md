@@ -22,6 +22,8 @@ It also adds a few minor features, like:
 
 * If you're using Keycloak, Wordpress's user registration URL will redirect to your Keycloak user registration URL
 
+* An experimental "silent login" feature allows users to be automatically logged in to Wordpress as long as they are already logged in at the IdP in the same browser.
+
 It also does NOT support these features, by design:
 
 * Making a site private (there are other plugins for that)

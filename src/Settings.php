@@ -196,4 +196,14 @@ Settings::$page->parent('users.php')->option('oidc_sso')->sections( array(
 			),
 		)
 	),
+	'other_settings' => new SettingsGroup(
+		__( 'Other Settings' ), '',
+		array(
+			'silent_login' => new TextSetting(
+				__('Silent Login Interval'),
+				__('How often (in minutes) should we attempt to silently log in a user who\'s already logged in at the identity provider?  0 disables silent login.'),
+				60
+			)
+		)
+	),
 ));

@@ -3,7 +3,7 @@
 Plugin Name:  OpenID Connect Single Sign-On
 Plugin URI:   https://github.com/pjeby/oidc-sso/
 Description:  Replace WP login+registration with an OIDC IdP
-Version:      0.1.0
+Version:      0.2.0
 Author:       PJ Eby
 Author URI:   https://github.com/pjeby
 License:      GPL2
@@ -57,7 +57,8 @@ class Plugin {
 				'username_format'    => '{random:5}',
 				'nickname_format'    => '{given name} {family_name:1}',
 				'email_format'       => '{email}',
-				'displayname_format' => '{given name} {family_name:1}'
+				'displayname_format' => '{given name} {family_name:1}',
+				'silent_login'       => 0
 			);
 			static::$settings = (object) array_replace_recursive($defaults, get_option(OPTION_NAME, array()));
 		}
@@ -79,7 +80,6 @@ class Plugin {
 
 
 
-
 	/**
 	 * Don't treat a user as logged in if their SSO expires and can't be refreshed
 	 */
@@ -92,8 +92,22 @@ class Plugin {
 				if ( ! $session->can_refresh() || !$session->do_refresh() ) {
 					$session->destroy();
 					wp_clear_auth_cookie();
-					return false;
+					$user_id = false;
 				}
+			}
+		}
+
+		if ( // Should we do a silent login?
+			! $user_id &&
+			$_SERVER['REQUEST_METHOD'] === 'GET' &&	   // only safe thing to redirect
+			$GLOBALS['pagenow'] !== 'wp-login.php' &&  // avoid infinite redirect
+			!empty($interval = static::settings()->silent_login)
+		) {
+			// We only do silent login if the cookie is set, to prevent redirect loops
+			$attempt = get($_COOKIE['oidc_sso_last_login_attempt'], 0);
+			if ( !empty($attempt) && time() > intval($attempt) + $interval ) {
+				wp_redirect( add_query_arg('prompt', 'none', wp_login_url($_SERVER['REQUEST_URI'])) );
+				exit;
 			}
 		}
 		return $user_id;
@@ -107,7 +121,6 @@ class Plugin {
 	}
 }
 
-
 /* Bootstrap */
 
 static_filter( Plugin::class, 'determine_current_user', LAST );
@@ -116,8 +129,36 @@ static_filter( Plugin::class, 'login_url',        LAST, 2, 'always_redirect');
 static_filter( Plugin::class, 'logout_url',       LAST, 2, 'always_redirect');
 static_filter( Plugin::class, 'lostpassword_url', LAST, 2, 'always_redirect');
 static_filter( Plugin::class, 'register_url',     LAST, 2, 'always_redirect');
+
 add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), array(Plugin::class, 'filter_plugin_action_links'));
 
 static_action( Settings::class, 'admin_menu' );
 static_action( LoginForm::class, 'login_init', FIRST );
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
