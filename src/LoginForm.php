@@ -20,6 +20,10 @@ class LoginForm {
 		static::login();
 	}
 
+	static function get_redirect() {
+		return wp_unslash(get($_GET['redirect_to'], ''));
+	}
+
 	static function register() {
 		// If the IdP is Keycloak, direct register actions to the registration page
 		$ep = Plugin::settings()->endpoint_login;
@@ -32,17 +36,17 @@ class LoginForm {
 
 	static function login() {
 		if ( !empty($_GET['state']) ) {
-			IdP::authorize($_GET);
+			IdP::authorize(wp_unslash($_GET));
 		} else {
 			if ( !empty($_REQUEST['reauth']) ) $_GET['max_age'] = '0';
-			IdP::login($_GET);
+			IdP::login(wp_unslash($_GET));
 		}
 		exit;
 	}
 
 	static function logout() {
 		check_admin_referer('log-out');
-		IdP::logout( get( $_REQUEST['redirect_to'], '') );
+		IdP::logout( static::get_redirect() );
 		exit;
 	}
 }
