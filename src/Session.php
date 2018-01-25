@@ -62,7 +62,8 @@ class Session {
 	}
 
 	function authorize($resp) {
-		if (!empty($resp[ 'id_token' ])) $this->id_token = $resp[ 'id_token' ];
+		try { if (!empty($resp[ 'id_token' ])) $this->id_claim = UnverifiedJWT::decode($resp['id_token']); }
+		catch ( \Exception $e ) {}
 		$this->is_sso = true;
 		$this->access_token  = get( $resp['access_token'],  null );
 		$this->session_state = get( $resp['session_state'], null );
@@ -79,13 +80,16 @@ class Session {
 		$this->save();
 	}
 
-
 	function save() {
 		if ($this->dirty) {
 			$this->all[static::SSO_KEY] = $this->obfuscated($this->sso);
 			$this->manager->update($this->token, $this->all);
 			$this->dirty = false;
 		}
+	}
+
+	function auth_time() {
+		return (isset($this->id_claim) && isset($this->id_claim->auth_time)) ? $this->id_claim->auth_time : $this->login;
 	}
 
 	function cookie_expires() {
@@ -116,8 +120,4 @@ class Session {
 		if ( isset($data['refresh_token']) ) $data['refresh_token'] = $callback($data['refresh_token']);
 		return $data;
 	}
-
 }
-
-
-

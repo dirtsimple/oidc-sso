@@ -3,7 +3,7 @@
 Plugin Name:  OpenID Connect Single Sign-On
 Plugin URI:   https://github.com/pjeby/oidc-sso/
 Description:  Replace WP login+registration with an OIDC IdP
-Version:      0.3.0
+Version:      0.3.1
 Author:       PJ Eby
 Author URI:   https://github.com/pjeby
 License:      GPL2
@@ -114,7 +114,7 @@ class Plugin {
 	}
 
 	static function recent_login($max_age=3600, $redirect=true) {
-		if (is_user_logged_in() && Session::current()->login > time() - $max_age) return true;
+		if (is_user_logged_in() && time() - Session::current()->auth_time() <= $max_age) return true;
 		if ($redirect) static::maybe_login('max_age', $max_age);
 		return false; // no $redirect or not safe to redirect
 	}
