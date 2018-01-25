@@ -39,7 +39,7 @@ class Session {
 		$this->{$this->varloc($key)}[ $key ] = $value; $this->dirty = true;
 	}
 
-	protected function varloc($key) { return $key !== 'expiration' ? 'sso' : 'all'; }
+	protected function varloc($key) { return ($key !== 'expiration' && $key !== 'login') ? 'sso' : 'all'; }
 
 	function needs_refresh() {
 		return $this->is_sso && $this->refresh_after < time();

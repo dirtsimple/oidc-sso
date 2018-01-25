@@ -80,7 +80,7 @@ class IdP {
 
 
 
-	protected static function safe_redirect($redirect) {
+	static function safe_redirect($redirect) {
 		wp_safe_redirect( empty($redirect) ? home_url() : $redirect );
 		exit;
 	}

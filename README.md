@@ -24,6 +24,8 @@ It also adds a few minor features, like:
 
 * An experimental "silent login" feature allows users to be automatically logged in to Wordpress as long as they are already logged in at the IdP in the same browser.
 
+* An API for requiring login freshness (e.g. for account management pages, placing orders, etc.): `oidc_sso\Plugin::recent_login($timeout=3600, $redirect=true)` will redirect through a login page if it's been longer than `$timeout` since the user logged in.  Returns true if the session is new enough, false otherwise.  If the session is too old, `$redirect` is true, and it's safe to redirect, the function redirects and exits without returning.  (The purpose of this API is to have a way to do Github-style "sudo mode" or Amazon's allowing you to browse for long periods but requiring a recent login for more secure pages.)
+
 It also does NOT support these features, by design:
 
 * Making a site private (there are other plugins for that)
@@ -56,11 +58,6 @@ There are quite a few varieties of error that can happen:
 Each of these kinds of errors needs to be handled differently in the UI, including where possible an option to go to the same page or to the redirect target page or the home page.  (This should not be done via "back", as the history likely includes IdP login or registration pages.  Note too that some of these errors occur at a redirect endpoint instead of in response to queries made by the plugin to the IdP.)
 
 When refreshing tokens, errors should usually not be displayed, and the user simply logged out silently.  While this may cause users to be logged out in case of temporary availability issues with the IdP, we are largely assuming the IdP is in the same datacenter with the Wordpress site and that restarts of the IdP are likely less frequent than restarts of Wordpress.  These decisions may not play well with more distributed or less-managed environments.
-
-### Research/Design Needed
-
-* Auto-login support ("Already sso'd?  redirect w/prompt=none")
-* Freshness support ("force login if it's been more than X seconds")
 
 ### Wishlist
 

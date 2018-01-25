@@ -3,7 +3,7 @@
 Plugin Name:  OpenID Connect Single Sign-On
 Plugin URI:   https://github.com/pjeby/oidc-sso/
 Description:  Replace WP login+registration with an OIDC IdP
-Version:      0.2.0
+Version:      0.3.0
 Author:       PJ Eby
 Author URI:   https://github.com/pjeby
 License:      GPL2
@@ -40,7 +40,6 @@ function trap($value, $context) {
 
 
 class Plugin {
-
 	protected static $settings;
 
 	static function settings() {
@@ -71,14 +70,15 @@ class Plugin {
 		return true;
 	}
 
+	static function safe_to_redirect() {
+		return $_SERVER['REQUEST_METHOD'] === 'GET' && $GLOBALS['pagenow'] !== 'wp-login.php';
+	}
+
 	static function always_redirect($url, $redirect='') {
 		// Always redirect to origin page
 		if ( empty($redirect) ) $url = add_query_arg('redirect_to', $_SERVER['REQUEST_URI'], $url);
 		return $url;
 	}
-
-
-
 
 	/**
 	 * Don't treat a user as logged in if their SSO expires and can't be refreshed
@@ -97,21 +97,29 @@ class Plugin {
 			}
 		}
 
-		if ( // Should we do a silent login?
-			! $user_id &&
-			$_SERVER['REQUEST_METHOD'] === 'GET' &&	   // only safe thing to redirect
-			$GLOBALS['pagenow'] !== 'wp-login.php' &&  // avoid infinite redirect
-			!empty($interval = static::settings()->silent_login)
-		) {
+		if ( ! $user_id && !empty($interval = static::settings()->silent_login) ) {
 			// We only do silent login if the cookie is set, to prevent redirect loops
 			$attempt = get($_COOKIE['oidc_sso_last_login_attempt'], 0);
 			if ( !empty($attempt) && time() > intval($attempt) + $interval * 60 ) {
-				wp_redirect( add_query_arg('prompt', 'none', wp_login_url($_SERVER['REQUEST_URI'])) );
-				exit;
+				static::maybe_login();
 			}
 		}
 		return $user_id;
 	}
+
+	static function maybe_login($arg='prompt', $val='none') {
+		if ( ! static::safe_to_redirect() ) return;
+		wp_redirect( add_query_arg($arg, $val, wp_login_url($_SERVER['REQUEST_URI'])) );
+		exit;
+	}
+
+	static function recent_login($max_age=3600, $redirect=true) {
+		if (is_user_logged_in() && Session::current()->login > time() - $max_age) return true;
+		if ($redirect) static::maybe_login('max_age', $max_age);
+		return false; // no $redirect or not safe to redirect
+	}
+
+
 
 	static function filter_plugin_action_links($links) {
 		if ( current_user_can( 'manage_options' ) )  {
@@ -120,6 +128,7 @@ class Plugin {
 		return $links;
 	}
 }
+
 
 /* Bootstrap */
 
@@ -134,15 +143,6 @@ add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), array(Plugin::
 
 static_action( Settings::class, 'admin_menu' );
 static_action( LoginForm::class, 'login_init', FIRST );
-
-
-
-
-
-
-
-
-
 
 
 
