@@ -62,13 +62,13 @@ class Session {
 	}
 
 	function authorize($resp) {
-		try { if (!empty($resp[ 'id_token' ])) $this->id_claim = UnverifiedJWT::decode($resp['id_token']); }
-		catch ( \Exception $e ) {}
+		try {
+			if (!empty($resp[ 'id_token' ])) $this->id_claim = UnverifiedJWT::decode($resp['id_token']);
+		} catch ( \Exception $e ) {}
 		$this->is_sso = true;
 		$this->access_token  = get( $resp['access_token'],  null );
 		$this->session_state = get( $resp['session_state'], null );
 		$this->refresh_token = get( $resp['refresh_token'], null );
-		$this->last_verified = time();
 		$now = time() - IdP::http_timeout();
 		$this->refresh_after = $now + $resp['expires_in'];
 		$this->refresh_expires = $rex = get( $resp[ 'refresh_expires_in' ], false );
