@@ -64,7 +64,7 @@ class IdP {
 			if ( isset($params[$key]) ) $args[$key] = $params[$key];
 		}
 
-		return add_query_arg($args, $settings->endpoint_login);
+		return add_query_arg(urlencode_deep($args), $settings->endpoint_login);
 	}
 
 	static function new_state($redirect, $prompt) {
@@ -106,7 +106,7 @@ class IdP {
 			if (!empty($session->id_token)) {
 				$args['id_token_hint'] = $session->id_token;
 			}
-			return add_query_arg($args, $logout);
+			return add_query_arg(urlencode_deep($args), $logout);
 		}
 		return $redirect;
 	}

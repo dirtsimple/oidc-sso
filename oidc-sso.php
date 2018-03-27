@@ -76,7 +76,7 @@ class Plugin {
 
 	static function always_redirect($url, $redirect='') {
 		// Always redirect to origin page
-		if ( empty($redirect) ) $url = add_query_arg('redirect_to', $_SERVER['REQUEST_URI'], $url);
+		if ( empty($redirect) ) $url = add_query_arg('redirect_to', urlencode($_SERVER['REQUEST_URI']), $url);
 		return $url;
 	}
 
@@ -109,7 +109,7 @@ class Plugin {
 
 	static function maybe_login($arg='prompt', $val='none') {
 		if ( ! static::safe_to_redirect() ) return;
-		wp_redirect( add_query_arg($arg, $val, wp_login_url($_SERVER['REQUEST_URI'])) );
+		wp_redirect( add_query_arg($arg, urlencode($val), wp_login_url($_SERVER['REQUEST_URI'])) );
 		exit;
 	}
 
