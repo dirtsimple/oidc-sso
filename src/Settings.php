@@ -134,22 +134,22 @@ Settings::$page->parent('users.php')->option('oidc_sso')->sections( array(
 			),
 			'endpoint_login' => new TextSetting(
 				__('Login Endpoint URL'),
-				__('Identify provider authorization endpoint.'),
+				__('Identity provider authorization endpoint.'),
 				'https://example.com/oauth2/authorize'
 			),
 			'endpoint_userinfo' => new TextSetting(
 				__('Userinfo Endpoint URL'),
-				__('Identify provider User information endpoint.'),
+				__('Identity provider User information endpoint.'),
 				'https://example.com/oauth2/UserInfo'
 			),
 			'endpoint_token'    => new TextSetting(
 				__('Token Validation Endpoint URL'),
-				__('Identify provider token endpoint.'),
+				__('Identity provider token endpoint.'),
 				'https://example.com/oauth2/token'
 			),
 			'endpoint_end_session'    => new TextSetting(
 				__('End Session Endpoint URL'),
-				__('Identify provider logout endpoint.'),
+				__('Identity provider logout endpoint.'),
 				'https://example.com/oauth2/logout'
 			),
 			'http_request_timeout'      => new TextSetting(
