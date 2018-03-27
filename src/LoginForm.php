@@ -26,9 +26,16 @@ class LoginForm {
 
 	static function register() {
 		// If the IdP is Keycloak, direct register actions to the registration page
-		$ep = Plugin::settings()->endpoint_login;
-		Plugin::settings()->endpoint_login = preg_replace('\'(/auth/realms/[^/]+/protocol/openid-connect)/auth$\'', '\\1/registrations', $ep);
-		static::login();
+        $pluginSettings = Plugin::settings();
+        $endpoint = preg_replace('\'(/auth/realms/[^/]+/protocol/openid-connect)/auth$\'', '\\1/registrations', $pluginSettings->endpoint_login);
+
+        if (!empty($pluginSettings->endpoint_register)) {
+            $endpoint = $pluginSettings->endpoint_register;
+        }
+
+        Plugin::settings()->endpoint_login = $endpoint;
+
+        static::login();
 	}
 
 	// enable post/page password functionality

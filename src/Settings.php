@@ -152,6 +152,11 @@ Settings::$page->parent('users.php')->option('oidc_sso')->sections( array(
 				__('Identify provider logout endpoint.'),
 				'https://example.com/oauth2/logout'
 			),
+            'endpoint_register'    => new TextSetting(
+                __('Registration form endpoint URL'),
+                __('Identify provider registration endpoint.'),
+                'https://example.com/oauth2/register'
+            ),
 			'http_request_timeout'      => new TextSetting(
 				__('HTTP Request Timeout'),
 				__('Set the timeout for requests made to the IDP. Default value is 5.'),

@@ -52,6 +52,7 @@ class Plugin {
 				'endpoint_userinfo' => '',
 				'endpoint_token'    => '',
 				'endpoint_end_session' => '',
+                'endpoint_register' => '',
 				'http_request_timeout' => 5,
 				'username_format'    => '{random:5}',
 				'nickname_format'    => '{given name} {family_name:1}',
