@@ -1,7 +1,7 @@
 {
   "name": "dirtsimple/oidc-sso",
   "type": "wordpress-plugin",
-  "license": "GPL2",
+  "license": "GPL-2.0-only",
   "autoload": { "classmap": ["."] },
   "require": {
     "composer/installers": "^1.4",
