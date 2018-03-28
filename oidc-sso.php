@@ -3,7 +3,7 @@
 Plugin Name:  OpenID Connect Single Sign-On
 Plugin URI:   https://github.com/pjeby/oidc-sso/
 Description:  Replace WP login+registration with an OIDC IdP
-Version:      0.3.2
+Version:      0.4.0
 Author:       PJ Eby
 Author URI:   https://github.com/pjeby
 License:      GPL2
