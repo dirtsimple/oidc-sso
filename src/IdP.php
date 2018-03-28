@@ -4,11 +4,11 @@ namespace oidc_sso;
 class IdP {
 	const STATE_COOKIE = 'oidc-sso-state';
 
-	static function login($params) {
+	static function login($params, $endpoint='login') {
 		// Redirect to IdP login with generated state
 		$state = static::new_state( get($params['redirect_to'], ''),  get($params['prompt'], ''));
 		setcookie('oidc_sso_last_login_attempt', intval(time()), time() + YEAR_IN_SECONDS, COOKIEPATH, COOKIE_DOMAIN, true, true);
-		wp_redirect( static::auth_url($state, $params) ); exit;
+		wp_redirect( static::auth_url($state, $params, $endpoint) ); exit;
 	}
 
 	static function authorize($params) {
@@ -49,7 +49,7 @@ class IdP {
 		return json_decode($cookie);
 	}
 
-	static function auth_url($state, $params) {
+	static function auth_url($state, $params, $endpoint='login') {
 		$settings = Plugin::settings();
 
 		$args = array(
@@ -64,7 +64,7 @@ class IdP {
 			if ( isset($params[$key]) ) $args[$key] = $params[$key];
 		}
 
-		return add_query_arg(urlencode_deep($args), $settings->endpoint_login);
+		return add_query_arg(urlencode_deep($args), $settings->{"endpoint_$endpoint"});
 	}
 
 	static function new_state($redirect, $prompt) {

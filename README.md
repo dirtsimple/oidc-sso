@@ -20,7 +20,7 @@ It also adds a few minor features, like:
 
 * You can pass arguments to the IdP by adding them to `login_url()`: both the standards-defined `prompt`, `max_age`, `login_hint`, `ui_locales`, and the Keycloak-specific `kc_idp_hint`.
 
-* If you're using Keycloak, Wordpress's user registration URL will redirect to your Keycloak user registration URL
+* Wordpress's user registration URL is redirected to your IdP login page (or if you're using Keycloak, AWS, or another IdP with registration flow, it can redirect to the registration flow instead).
 
 * An experimental "silent login" feature allows users to be automatically logged in to Wordpress as long as they are already logged in at the IdP in the same browser.
 

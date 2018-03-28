@@ -137,6 +137,11 @@ Settings::$page->parent('users.php')->option('oidc_sso')->sections( array(
 				__('Identity provider authorization endpoint.'),
 				'https://example.com/oauth2/authorize'
 			),
+			'endpoint_register' => new TextSetting(
+				__('Registration Form Endpoint URL'),
+				__('Some services (e.g Keycloak, AWS) provide an optional registration flow endpoint'),
+				'https://example.com/auth/realms/mysite/protocol/openid-connect/registrations'
+			),
 			'endpoint_userinfo' => new TextSetting(
 				__('Userinfo Endpoint URL'),
 				__('Identity provider User information endpoint.'),

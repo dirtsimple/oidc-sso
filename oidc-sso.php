@@ -41,7 +41,6 @@ function trap($value, $context) {
 
 class Plugin {
 	protected static $settings;
-
 	static function settings() {
 		if ( empty(static::$settings) ) {
 			$defaults = array(
@@ -49,6 +48,7 @@ class Plugin {
 				'client_secret'     => '',
 				'scope'             => 'openid',
 				'endpoint_login'    => '',
+				'endpoint_register' => '',
 				'endpoint_userinfo' => '',
 				'endpoint_token'    => '',
 				'endpoint_end_session' => '',

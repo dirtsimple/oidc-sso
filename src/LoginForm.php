@@ -25,16 +25,13 @@ class LoginForm {
 	}
 
 	static function register() {
-		// If the IdP is Keycloak, direct register actions to the registration page
-		$ep = Plugin::settings()->endpoint_login;
-		Plugin::settings()->endpoint_login = preg_replace('\'(/auth/realms/[^/]+/protocol/openid-connect)/auth$\'', '\\1/registrations', $ep);
-		static::login();
+		static::login( empty( Plugin::settings()->endpoint_register ) ? 'login' : 'register' );
 	}
 
 	// enable post/page password functionality
 	static function postpass() { return; }
 
-	static function login() {
+	static function login($endpoint='login') {
 		if ( !empty($_GET['state']) ) {
 			IdP::authorize(wp_unslash($_GET));
 		} else {
@@ -42,7 +39,7 @@ class LoginForm {
 			if ( !empty($_REQUEST['reauth']) ) $_GET['max_age'] = get($_GET['max_age'], '0');
 
 			if ( !is_user_logged_in() || isset($_GET['max_age']) ) {
-				IdP::login(wp_unslash($_GET));
+				IdP::login(wp_unslash($_GET), $endpoint);
 			} else {
 				// Already logged in and no re-auth requested: just redirect
 				IdP::safe_redirect( static::get_redirect() );
