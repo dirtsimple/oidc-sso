@@ -1,6 +1,7 @@
 {
   "name": "dirtsimple/oidc-sso",
   "type": "wordpress-plugin",
+  "description": "OpenID Connect Single Sign-On for Wordpress",
   "license": "GPL-2.0-only",
   "autoload": { "classmap": ["."] },
   "require": {
