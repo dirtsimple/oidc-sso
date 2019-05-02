@@ -13,10 +13,10 @@ class IdP {
 
 	static function authorize($params) {
 		$state = trap( static::check_state( get($params['state'], '') ), 'authorize');
-		if ( is_user_logged_in() ) wp_logout();  // destroy previous session
 		if ( $state->prompt === 'none' && substr_compare( 'xxxxxxxxx' . get($params['error'], ''), '_required', -9 ) === 0 )
 			static::safe_redirect( $state->redirect );
-		elseif ( !empty($params['error']) ) {
+		if ( is_user_logged_in() ) wp_logout();  // destroy previous session
+		if ( !empty($params['error']) ) {
 			# per https://openid.net/specs/openid-connect-core-1_0.html#AuthError and https://tools.ietf.org/html/rfc6749#section-4.1.2.1
 			$data = array('state' => $state, 'error_uri' => get($params['error_uri'], ''));
 			trap( new \WP_Error( 'oidc_' . $params['error'], esc_html(get($params['error_description'], $params['error'])), $data), 'authorize' );
@@ -45,7 +45,6 @@ class IdP {
 		if (empty($state) || empty($cookie) || $state !== wp_hash($cookie)) {
 			return new \WP_Error( 'invalid_state', __( 'Invalid state.' ), $state );
 		}
-		static::set_state_cookie('');  // state can only be used once
 		return json_decode($cookie);
 	}
 
